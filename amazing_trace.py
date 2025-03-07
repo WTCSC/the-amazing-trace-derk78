@@ -20,11 +20,11 @@ def execute_traceroute(destination):
     
     """
     
-    process = subprocess.run(["traceroute", "google.com"], check=True, capture_output=True, text=True)
+    process = subprocess.run(["traceroute", destination, "-i"], check=True, capture_output=True, text=True)
     
     output = process.stdout
     
-    print(output)
+    return output
     
     
     # Your code here
@@ -73,6 +73,11 @@ def parse_traceroute(traceroute_output):
         ]
     ```
     """
+    if traceroute_output == "*": 
+        
+    
+    
+    
     # Your code here
     # Hint: Use regular expressions to extract the relevant information
     # Handle timeouts (asterisks) appropriately

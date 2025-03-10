@@ -20,7 +20,7 @@ def execute_traceroute(destination):
     
     """
     
-    process = subprocess.run(["traceroute", destination, "-i"], check=True, capture_output=True, text=True)
+    process = subprocess.run(["traceroute", destination, "-I"], check=True, capture_output=True, text=True)
     
     output = process.stdout
     
@@ -73,10 +73,27 @@ def parse_traceroute(traceroute_output):
         ]
     ```
     """
-    if traceroute_output == "*": 
-        
-    
-    
+    result = []
+    lines = traceroute_output.split('\n')
+
+    if lines:
+        first_line = lines[0].strip()
+        if first_line and first_line.isdigit():
+            pass
+        else:
+            lines = lines[1:]
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        hop = {
+            "hop" : None,
+            "ip" : None, 
+            "hostname" : None, 
+            "rtt" : [None, None, None]
+        }
     
     # Your code here
     # Hint: Use regular expressions to extract the relevant information

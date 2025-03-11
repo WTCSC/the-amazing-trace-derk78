@@ -4,6 +4,9 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 import time
 import os
+import subprocess
+import re
+
 
 def execute_traceroute(destination):
     """
@@ -14,7 +17,18 @@ def execute_traceroute(destination):
 
     Returns:
         str: The raw output from the traceroute command
+        
+    
     """
+    #Use the subprocess module to run the `traceroute` command and then return the standard output.
+    process = subprocess.run(["traceroute", "-I", destination], check=True, capture_output=True, text=True)
+    
+    output = process.stdout
+    
+    return output
+    
+
+    
     # Your code here
     # Hint: Use the subprocess module to run the traceroute command
     # Make sure to handle potential errors
@@ -61,13 +75,107 @@ def parse_traceroute(traceroute_output):
         ]
     ```
     """
+
+    #Start with an empty list that we will use to store all of our hops to then be returned when we run the script.
+    result = []
+
+    #Split the output we got from using `subprocess.run` to run the `traceroute` command in the first function and then split it at every new line.
+    lines = traceroute_output.split('\n')
+
+    #Iterate over those lines and define the first line as the first index in the list of lines.
+    #We also want to check if the first line exists and if it is not a digit because it if it isn't a digit then we will start the index after the first line.
+    if lines:
+        first_line = lines[0].strip()
+        if first_line and first_line.isdigit():
+            pass
+        else:
+            lines = lines[1:]
+
+    #Start iterating over the lines and also strip off any unnesecarry whitespace.
+    #If there is nothing it will keep the set values of `None` for the hop and continue.
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        #Define the dictionary that will be used to format the output of the `traceroute` command.
+        hop = {
+            "hop" : None,
+            "ip" : None, 
+            "hostname" : None, 
+            "rtt" : [None, None, None]
+        }
+
+    
+        #Used `re.match` to extract the first number from the line, which is the hop number.
+        #Also check if hop_num is `None` and if it is skip the line and move onto the next.
+        #Then the hop number is converted into an integer and stored in our dictionary.
+        hop_num = re.match(r'^\s*(\d+)', line)
+        if not hop_num:
+            continue
+        hop["hop"] = int(hop_num.group(1))
+
+
+        #Incase we get three asterisks in a row which means that there was a timeout then we append and move on since those predefined values of `None` will stay the same.
+        if "* * *" in line:
+            result.append(hop)
+            continue
+
+        #Define the regular expression pattern that we will use to find only the IP address without any parentheses.
+        ip_address_pattern = r'\(?\b(?:\d{1,3}\.){3}\d{1,3}\b\)?'
+
+        #`re.search` will find the IP address, using the pattern that we defined, anywhere in the `traceroute_output`.
+        ip_match = re.search(ip_address_pattern, line)
+
+        #If the `ip_match` actually exists then we have to append the match from the `re.search` using `.group` and strip it for parentheses incase it is incased in them. 
+        if ip_match:
+            hop["ip"] = ip_match.group(0).strip("()")
+
+            #Since we know that the hostname comes before the ip address to find the hostname we can use `.start()` since it will take the index where the IP address starts and then look through the section before the IP address starts.
+            hostname = line[:ip_match.start()].strip()
+
+            #After we get everything that comes before the IP address we should have the number of hops and the hostname so we will need to split at the spaces and take the last index which will be the hostname.
+            hostname_parts = hostname.split()
+
+            #Here we run a whole bunch of checks to make sure that the hostname is actually the hostname and not a number or the IP address.
+            if hostname_parts and not hostname_parts[-1].isdigit() and hostname_parts != hop["ip"]:
+                hop["hostname"] = hostname_parts[-1]
+            else:
+                hop["hostname"] = None
+        else:
+            hop["ip"] = None
+            hop["hostname"] = None
+
+
+        #Here we use `re.findall` with a regular expression that will find all instances of a string that has the numbers 0-9 and ms for milliseconds after. 
+        rtt_matches = re.findall(r"([0-9.]+\s*ms|\*)", line)
+
+        #iterate over a range of 3 since we know that there will be three RTT values
+        for i in range(3):
+            if i < len(rtt_matches):
+
+                #Strip off any whitespace
+                rtt = rtt_matches[i].strip()
+
+                #If it is an asterisk then set it equal to `None`.
+                if rtt == "*":
+                    hop["rtt"][i] = None
+                else:
+                    #Also convert the RTT to a float(decimal) and `None` if it is an asterisk.
+                    rtt_number = rtt.replace("ms", "").strip()
+                    hop["rtt"][i] = float(rtt_number)
+
+        
+        #Finally append the parsed hop data to the results list to be returned.
+        result.append(hop)
+
+    return result
     # Your code here
     # Hint: Use regular expressions to extract the relevant information
     # Handle timeouts (asterisks) appropriately
 
     # Remove this line once you implement the function,
     # and don't forget to *return* the output
-    pass
 
 # ============================================================================ #
 #                    DO NOT MODIFY THE CODE BELOW THIS LINE                    #

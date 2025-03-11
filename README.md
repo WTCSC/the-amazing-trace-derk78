@@ -3,10 +3,10 @@
 
 
 ## Description
-This tool is designed to execute the traceroute command from linux and parse the data to make it easier to comprehend and visualize the traceroute data to analyse network latency and routing paths.
+This tool is designed to execute the `traceroute` command from linux and parse the data to visualize it on a line graph.
 
 ## Why Use This Tool?
-Traceroute is essential for diagnosing network issues, such as slow connections or unreachable hosts. This tool makes it easier to visualize and understand the information from the `traceroute` command.
+Traceroute is essential for diagnosing network issues, such as slow connections or unreachable hosts. This tool makes it easier to visualize and understand the information from the `traceroute` command by plotting the information on a graph.
 
 ## Features
 
@@ -18,7 +18,8 @@ Traceroute is essential for diagnosing network issues, such as slow connections 
 
 ## Dependencies 
 
-*You will also need these modules to run the tool*
+**You will also need these modules to run the tool**
+
 - `matplotlib` – for visualizing traceroute data.
 - `pandas` – for handling and processing the data.
 - `numpy` – for numerical operations, such as calculating averages.
@@ -28,7 +29,7 @@ You can install the required modules by running the following command in bash:
 
 `pip install matplotlib pandas numpy`
 
-This script works on Linux and macOS natively since they are made to run the `traceroute` command. However, for the most consistent development environment across platforms, **Vagrant** with a virtual machine that runs a Linux distribution would be your best option.
+This script works on Linux and macOS natively since they are made to run the `traceroute` command. However, **Vagrant** is recommended to run this script since it's virtualized invironment is easy to set up and 
 
 
 
@@ -38,9 +39,8 @@ To run the tool all you need to do is place `python3` or `python` infront of the
 e.g. `python3 amazing_trace.py`. Then all you need to do is look in the output folder and you will see all the data from running the file on a nice line graph.
 
 ## Example Usage
-
+**Running the tool in the terminal:**
 ![alt text](image-1.png)
-*Running the tool in the terminal.*
 
+**Results from running the exectuable in the terminal plotted on a line graph:**
 ![alt text](image-2.png)
-*Results from running the exectuable in the terminal on a line graph.*

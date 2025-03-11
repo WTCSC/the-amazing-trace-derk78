@@ -83,8 +83,7 @@ def parse_traceroute(traceroute_output):
     lines = traceroute_output.split('\n')
 
     #Iterate over those lines and define the first line as the first index in the list of lines.
-    #We also want to check if the first line exists and if it is a digit because we are checking if the first line is a header and if it is then we will pass it.
-    #Othewise start the count at index 1.
+    #We also want to check if the first line exists and if it is not a digit because it if it isn't a digit then we will start the index after the first line.
     if lines:
         first_line = lines[0].strip()
         if first_line and first_line.isdigit():
@@ -107,9 +106,10 @@ def parse_traceroute(traceroute_output):
             "rtt" : [None, None, None]
         }
 
-        #Used `re.match` with the right format to find the number of hops at the beginning of the string.
-        #The regular expression format will extract the first number from the line, which is the hop number.
+    
+        #Used `re.match` to extract the first number from the line, which is the hop number.
         #Also check if hop_num is `None` and if it is skip the line and move onto the next.
+        #Then the hop number is converted into an integer and stored in our dictionary.
         hop_num = re.match(r'^\s*(\d+)', line)
         if not hop_num:
             continue
@@ -124,17 +124,17 @@ def parse_traceroute(traceroute_output):
         #Define the regular expression pattern that we will use to find only the IP address without any parentheses.
         ip_address_pattern = r'\(?\b(?:\d{1,3}\.){3}\d{1,3}\b\)?'
 
-        #`re.search` will find the IP address, using the pattern that we defined, anywhere in the `traceroute_output`
+        #`re.search` will find the IP address, using the pattern that we defined, anywhere in the `traceroute_output`.
         ip_match = re.search(ip_address_pattern, line)
 
         #If the `ip_match` actually exists then we have to append the match from the `re.search` using `.group` and strip it for parentheses incase it is incased in them. 
         if ip_match:
             hop["ip"] = ip_match.group(0).strip("()")
 
-            #Since we know that the hostname comes before the ip address to find the hostname we can use `.start()` since it will take the index where the IP address starts and then look through the list from the beginning and stop where the IP address starts.
+            #Since we know that the hostname comes before the ip address to find the hostname we can use `.start()` since it will take the index where the IP address starts and then look through the section before the IP address starts.
             hostname = line[:ip_match.start()].strip()
 
-            #After we get everything that comes before the IP address we will have the number of hops and the hostname so we will need to split at the spaces and take the last index which will be the hostname.
+            #After we get everything that comes before the IP address we should have the number of hops and the hostname so we will need to split at the spaces and take the last index which will be the hostname.
             hostname_parts = hostname.split()
 
             #Here we run a whole bunch of checks to make sure that the hostname is actually the hostname and not a number or the IP address.
